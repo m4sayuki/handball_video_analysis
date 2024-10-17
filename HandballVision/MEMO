@@ -8,3 +8,128 @@
 基本機能
 ・アップロード画面
 ・再生しながら、データを収集できる
+
+使用技術
+・OpenCV
+→画像読み込み
+・PyTorch
+→物体の認識
+・Postgres
+→動画ファイルの保存
+
+動画処理
+
+; 得点を計測する処理
+動画を読み込む
+↓
+動画内のゴールの位置を認識させる
+↓
+動画内のボールの位置を認識させる
+↓
+動画内でゴールにボールが入ったことを認識させる
+↓
+ゴールをカウントする
+
+1. 動画を読み込む
+役割: OpenCV
+
+OpenCVは動画の読み込み、フレーム単位での処理に非常に適しています。動画ファイルを読み込み、フレームごとに画像処理を行います。
+python
+コードをコピーする
+import cv2
+
+cap = cv2.VideoCapture('handball_match.mp4')
+while cap.isOpened():
+    ret, frame = cap.read()
+    if not ret:
+        break
+    # フレームごとの処理
+cap.release()
+2. 動画内のゴールの位置を認識させる
+役割: PyTorch
+
+PyTorchはディープラーニングモデルを使用して、ゴールの位置を認識するのに適しています。YOLO（You Only Look Once）やFaster R-CNNなどの物体検出モデルを使用します。これらのモデルは、ゴールの位置を示すバウンディングボックスを出力します。
+python
+コードをコピーする
+import torch
+from torchvision import models, transforms
+from PIL import Image
+
+# 事前訓練済みモデルのロード
+model = models.detection.fasterrcnn_resnet50_fpn(pretrained=True)
+model.eval()
+
+transform = transforms.Compose([
+    transforms.ToTensor(),
+])
+
+def detect_goal(frame):
+    image = Image.fromarray(frame)
+    image = transform(image).unsqueeze(0)
+    with torch.no_grad():
+        predictions = model(image)
+    return predictions
+3. 動画内のボールの位置を認識させる
+役割: PyTorch
+
+同様に、PyTorchを使用してボールの位置を認識します。物体検出モデル（YOLOやFaster R-CNN）を使用して、ボールの位置を検出します。
+python
+コードをコピーする
+def detect_ball(frame):
+    image = Image.fromarray(frame)
+    image = transform(image).unsqueeze(0)
+    with torch.no_grad():
+        predictions = model(image)
+    return predictions
+4. 動画内でゴールにボールが入ったことを認識させる
+役割: OpenCV + PyTorch
+
+ゴールとボールの位置がわかれば、OpenCVを使用してボールがゴールに入ったかどうかを判断します。具体的には、各フレームでゴールとボールの位置を比較し、ボールがゴールのバウンディングボックス内に入ったかどうかを確認します。
+python
+コードをコピーする
+def is_goal(ball_bbox, goal_bbox):
+    bx1, by1, bx2, by2 = ball_bbox
+    gx1, gy1, gx2, gy2 = goal_bbox
+    return (gx1 <= bx1 <= gx2 and gy1 <= by1 <= gy2) or (gx1 <= bx2 <= gx2 and gy1 <= by2 <= gy2)
+5. ゴールをカウントする
+役割: OpenCV + PyTorch
+
+フレームごとにゴールのカウントを更新します。ボールがゴールに入るたびにカウンターをインクリメントします。
+python
+コードをコピーする
+goal_count = 0
+
+cap = cv2.VideoCapture('handball_match.mp4')
+while cap.isOpened():
+    ret, frame = cap.read()
+    if not ret:
+        break
+    
+    # ゴールとボールの位置を検出
+    goal_predictions = detect_goal(frame)
+    ball_predictions = detect_ball(frame)
+    
+    # バウンディングボックスを取得（単純化のため最初の予測のみ使用）
+    goal_bbox = goal_predictions[0]['boxes'][0].numpy()
+    ball_bbox = ball_predictions[0]['boxes'][0].numpy()
+    
+    # ゴールの判定
+    if is_goal(ball_bbox, goal_bbox):
+        goal_count += 1
+    
+    # デバッグ用に表示
+    cv2.rectangle(frame, (goal_bbox[0], goal_bbox[1]), (goal_bbox[2], goal_bbox[3]), (0, 255, 0), 2)
+    cv2.rectangle(frame, (ball_bbox[0], ball_bbox[1]), (ball_bbox[2], ball_bbox[3]), (0, 0, 255), 2)
+    cv2.imshow('frame', frame)
+    
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
+
+cap.release()
+cv2.destroyAllWindows()
+
+print(f'Total Goals: {goal_count}')
+まとめ
+OpenCV: 動画の読み込みとフレームごとの処理、結果の表示。
+PyTorch: 物体検出モデルを使用してゴールとボールの位置を認識。
+このように、OpenCVとPyTorchを組み合わせて、ハンドボールの試合動画から得点を自動的にカウントすることができます。実際のモデルのトレーニングやチューニングは、より高度なデータセットとトレーニング手法を用いる必要がありますが、基本的なワークフローはこのようになります。
