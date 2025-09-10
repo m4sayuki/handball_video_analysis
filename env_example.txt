@@ -4,6 +4,13 @@ AWS_SECRET_ACCESS_KEY=your_secret_access_key_here
 AWS_STORAGE_BUCKET_NAME=handball-video-analysis-bucket
 AWS_S3_REGION_NAME=ap-northeast-1
 
+# Amazon EventBridge Settings
+AWS_EVENTBRIDGE_SCHEDULER_ROLE_ARN=arn:aws:iam::your-account-id:role/EventBridgeSchedulerRole
+
+# Amazon SQS Settings
+AWS_SQS_QUEUE_ARN=arn:aws:sqs:ap-northeast-1:your-account-id:your-queue-name.fifo
+AWS_SQS_MESSAGE_GROUP_ID=notice-push-notifications
+
 # Django Settings
 DEBUG=True
 SECRET_KEY=your_django_secret_key_here

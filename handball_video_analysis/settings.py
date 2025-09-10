@@ -155,3 +155,10 @@ else:
     # ローカルファイルストレージ設定（開発環境用）
     MEDIA_ROOT = BASE_DIR / 'media'
     MEDIA_URL = '/media/'
+
+# Amazon EventBridge Settings
+AWS_EVENTBRIDGE_SCHEDULER_ROLE_ARN = os.environ.get('AWS_EVENTBRIDGE_SCHEDULER_ROLE_ARN')
+
+# Amazon SQS Settings
+AWS_SQS_QUEUE_ARN = os.environ.get('AWS_SQS_QUEUE_ARN')
+AWS_SQS_MESSAGE_GROUP_ID = os.environ.get('AWS_SQS_MESSAGE_GROUP_ID', 'notice-push-notifications')
