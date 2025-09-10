@@ -16,8 +16,15 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import include, path
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path("handball_vision/", include("HandballVision.urls")),
+    path("notices/", include("notices.urls")),
 ]
+
+# 開発環境でのメディアファイル配信設定
+if settings.DEBUG and not getattr(settings, 'USE_S3', False):
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -1,0 +1,128 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block title %}S3接続テスト{% endblock %}
+
+{% block content %}
+<div class="module">
+    <h1>Amazon S3接続テスト</h1>
+    
+    <div class="form-row">
+        <div class="field-box">
+            <h2>現在の設定</h2>
+            <table>
+                <tr>
+                    <th>USE_S3:</th>
+                    <td>{{ use_s3|yesno:"有効,無効" }}</td>
+                </tr>
+                <tr>
+                    <th>バケット名:</th>
+                    <td>{{ aws_bucket|default:"未設定" }}</td>
+                </tr>
+                <tr>
+                    <th>リージョン:</th>
+                    <td>{{ aws_region|default:"未設定" }}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    
+    <div class="form-row">
+        <button type="button" id="test-s3-btn" class="default">S3接続テストを実行</button>
+    </div>
+    
+    <div id="test-results" style="margin-top: 20px; display: none;">
+        <h2>テスト結果</h2>
+        <div id="results-container"></div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const testBtn = document.getElementById('test-s3-btn');
+    const resultsDiv = document.getElementById('test-results');
+    const resultsContainer = document.getElementById('results-container');
+    
+    testBtn.addEventListener('click', function() {
+        testBtn.disabled = true;
+        testBtn.textContent = 'テスト実行中...';
+        resultsContainer.innerHTML = '<p>テストを実行しています...</p>';
+        resultsDiv.style.display = 'block';
+        
+        fetch(window.location.href, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            displayResults(data);
+        })
+        .catch(error => {
+            resultsContainer.innerHTML = '<p style="color: red;">エラーが発生しました: ' + error + '</p>';
+        })
+        .finally(() => {
+            testBtn.disabled = false;
+            testBtn.textContent = 'S3接続テストを実行';
+        });
+    });
+    
+    function displayResults(data) {
+        let html = '';
+        
+        if (data.success) {
+            html += '<div style="padding: 10px; background: #d4edda; border: 1px solid #c3e6cb; border-radius: 4px; margin-bottom: 10px;">';
+            html += '<strong style="color: #155724;">✅ テスト成功</strong>';
+            html += '</div>';
+        } else {
+            html += '<div style="padding: 10px; background: #f8d7da; border: 1px solid #f5c6cb; border-radius: 4px; margin-bottom: 10px;">';
+            html += '<strong style="color: #721c24;">❌ テスト失敗</strong>';
+            html += '</div>';
+        }
+        
+        html += '<table style="width: 100%; border-collapse: collapse;">';
+        html += '<thead><tr><th style="border: 1px solid #ddd; padding: 8px; background: #f2f2f2;">ステップ</th>';
+        html += '<th style="border: 1px solid #ddd; padding: 8px; background: #f2f2f2;">ステータス</th>';
+        html += '<th style="border: 1px solid #ddd; padding: 8px; background: #f2f2f2;">メッセージ</th></tr></thead>';
+        html += '<tbody>';
+        
+        data.results.forEach(result => {
+            let statusColor = '';
+            let statusIcon = '';
+            
+            switch(result.status) {
+                case 'success':
+                    statusColor = '#28a745';
+                    statusIcon = '✅';
+                    break;
+                case 'error':
+                    statusColor = '#dc3545';
+                    statusIcon = '❌';
+                    break;
+                case 'warning':
+                    statusColor = '#ffc107';
+                    statusIcon = '⚠️';
+                    break;
+                case 'info':
+                    statusColor = '#17a2b8';
+                    statusIcon = 'ℹ️';
+                    break;
+            }
+            
+            html += '<tr>';
+            html += '<td style="border: 1px solid #ddd; padding: 8px;">' + result.step + '</td>';
+            html += '<td style="border: 1px solid #ddd; padding: 8px; color: ' + statusColor + ';">' + statusIcon + '</td>';
+            html += '<td style="border: 1px solid #ddd; padding: 8px;">' + result.message + '</td>';
+            html += '</tr>';
+        });
+        
+        html += '</tbody></table>';
+        resultsContainer.innerHTML = html;
+    }
+});
+</script>
+
+{% csrf_token %}
+{% endblock %}
