@@ -252,4 +252,66 @@ echo "AWS_STORAGE_BUCKET_NAME: $AWS_STORAGE_BUCKET_NAME"
 python3 test_s3_simple.py
 ```
 
+## 9. EventBridge Scheduler と SQS の設定
+
+### EventBridge Scheduler 用 IAM ロールの作成
+
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Principal": {
+                "Service": "scheduler.amazonaws.com"
+            },
+            "Action": "sts:AssumeRole"
+        }
+    ]
+}
+```
+
+### IAM ロールに必要な権限
+
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "sqs:SendMessage"
+            ],
+            "Resource": "arn:aws:sqs:ap-northeast-1:your-account-id:your-queue-name.fifo"
+        }
+    ]
+}
+```
+
+### SQS FIFO キューの作成
+
+1. **AWS SQS コンソール**にアクセス
+2. **キューを作成**をクリック
+3. **FIFO キュー**を選択
+4. キュー名を入力（例：`handball-push-notifications.fifo`）
+5. **メッセージグループID**を有効にする
+6. **作成**をクリック
+
+### 環境変数の追加設定
+
+```env
+# Amazon EventBridge Settings
+AWS_EVENTBRIDGE_SCHEDULER_ROLE_ARN=arn:aws:iam::your-account-id:role/EventBridgeSchedulerRole
+
+# Amazon SQS Settings
+AWS_SQS_QUEUE_ARN=arn:aws:sqs:ap-northeast-1:your-account-id:your-queue-name.fifo
+AWS_SQS_MESSAGE_GROUP_ID=notice-push-notifications
+```
+
+### EventBridge 機能のテスト
+
+```bash
+python3 test_eventbridge_scheduler.py
+```
+
 これで環境変数の設定は完了です！
