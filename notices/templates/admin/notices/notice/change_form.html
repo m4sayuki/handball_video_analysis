@@ -1,0 +1,40 @@
+{% extends "admin/change_form.html" %}
+
+{% load static %}
+
+{% block admin_change_form_document_ready %}
+    {{ block.super }}
+    <script src="{% static 'notices/js/notice_validation.js' %}"></script>
+{% endblock %}
+
+{% block extrahead %}
+    {{ block.super }}
+    <!-- SweetAlert2 CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <style>
+        .field-error {
+            color: #ba2121;
+            font-size: 12px;
+            margin-top: 5px;
+            display: block;
+        }
+        
+        .error {
+            border-color: #ba2121 !important;
+            background-color: #ffe6e6 !important;
+        }
+        
+        .errorlist {
+            color: #ba2121;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+        
+        .errorlist li {
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+    </style>
+{% endblock %}
