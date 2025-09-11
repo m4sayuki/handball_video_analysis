@@ -130,4 +130,8 @@ dmypy.json
 
 # Virtual environment
 path/to/venv/ .env
+
+# Specific pip packages directory
+path/to/venv/lib/python3.12/site-packages/pip/
+
 .vscode/
