@@ -3,6 +3,7 @@ from django.db import transaction
 from django.contrib import messages
 from .models import Notice
 from .services import EventBridgeSchedulerService
+from .forms import NoticeAdminForm
 import logging
 
 logger = logging.getLogger(__name__)
@@ -11,6 +12,9 @@ logger = logging.getLogger(__name__)
 @admin.register(Notice)
 class NoticeAdmin(admin.ModelAdmin):
     """お知らせ管理画面"""
+    
+    # カスタムフォームを使用
+    form = NoticeAdminForm
     
     list_display = [
         'id', 'title', 'notice_type', 'status', 
@@ -30,8 +34,9 @@ class NoticeAdmin(admin.ModelAdmin):
             'fields': ('publish_start_at', 'publish_end_at')
         }),
         ('プッシュ通知', {
-            'fields': ('push_notification_scheduled_at', 'push_notification_icon'),
-            'classes': ('collapse',)
+            'fields': ('push_notification_scheduled_at', 'push_notification_icon_file', 'push_notification_icon_url'),
+            'classes': ('collapse',),
+            'description': 'アイコンファイルをアップロードするとURLが自動設定されます。'
         }),
         ('画像・URL', {
             'fields': ('list_image_url', 'detail_image_url', 'redirect_url'),

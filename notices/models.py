@@ -1,5 +1,4 @@
 from django.db import models
-from .storages import PushNotificationIconStorage
 
 
 class Notice(models.Model):
@@ -33,13 +32,12 @@ class Notice(models.Model):
     
     # プッシュ通知関連
     push_notification_scheduled_at = models.DateTimeField('プッシュ通知予定日時', null=True, blank=True)
-    push_notification_icon = models.ImageField(
-        'プッシュ通知アイコン', 
-        upload_to='push_notification_icons/', 
-        storage=PushNotificationIconStorage(),
+    push_notification_icon_url = models.URLField(
+        'プッシュ通知アイコンURL', 
+        max_length=2048,
         null=True, 
         blank=True,
-        help_text='推奨サイズ: 512x512px'
+        help_text='推奨サイズ: 512x512px。アップロードはサービスクラス経由で行います。'
     )
     
     # 画像URL

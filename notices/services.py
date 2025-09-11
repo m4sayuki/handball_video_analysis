@@ -5,12 +5,132 @@
 import boto3
 import json
 import logging
+import os
+import uuid
 from datetime import datetime
 from django.conf import settings
+from django.core.files.storage import FileSystemStorage
 from botocore.exceptions import ClientError
+
+try:
+    from storages.backends.s3boto3 import S3Boto3Storage
+    HAS_S3 = True
+except ImportError:
+    HAS_S3 = False
 
 
 logger = logging.getLogger(__name__)
+
+
+class S3FileUploadService:
+    """S3ファイルアップロードサービス"""
+    
+    def __init__(self):
+        """ストレージクライアントを初期化"""
+        self.use_s3 = getattr(settings, 'USE_S3', False) and HAS_S3
+        
+        if self.use_s3:
+            self.storage = S3PushNotificationIconStorage()
+        else:
+            self.storage = LocalPushNotificationIconStorage()
+    
+    def upload_push_notification_icon(self, file, filename=None):
+        """
+        プッシュ通知アイコンをアップロード
+        
+        Args:
+            file: アップロードするファイルオブジェクト
+            filename (str, optional): ファイル名（指定しない場合は自動生成）
+            
+        Returns:
+            tuple: (成功フラグ, ファイルURL or エラーメッセージ)
+        """
+        try:
+            # ファイル名が指定されていない場合は自動生成
+            if not filename:
+                # 元のファイル名から拡張子を取得
+                original_name = getattr(file, 'name', 'icon')
+                ext = os.path.splitext(original_name)[1]
+                filename = f"push_notification_icons/{uuid.uuid4().hex}{ext}"
+            else:
+                filename = f"push_notification_icons/{filename}"
+            
+            # ファイルを保存
+            saved_name = self.storage.save(filename, file)
+            
+            # URLを生成
+            if self.use_s3:
+                file_url = self.storage.url(saved_name)
+            else:
+                file_url = self.storage.url(saved_name)
+            
+            logger.info(f"プッシュ通知アイコンをアップロードしました: {saved_name}")
+            return True, file_url
+            
+        except Exception as e:
+            logger.error(f"プッシュ通知アイコンアップロードエラー: {str(e)}")
+            return False, f"アップロードエラー: {str(e)}"
+    
+    def delete_push_notification_icon(self, file_path):
+        """
+        プッシュ通知アイコンを削除
+        
+        Args:
+            file_path (str): 削除するファイルのパス
+            
+        Returns:
+            tuple: (成功フラグ, エラーメッセージ)
+        """
+        try:
+            if file_path and self.storage.exists(file_path):
+                self.storage.delete(file_path)
+                logger.info(f"プッシュ通知アイコンを削除しました: {file_path}")
+            
+            return True, None
+            
+        except Exception as e:
+            logger.error(f"プッシュ通知アイコン削除エラー: {str(e)}")
+            return False, f"削除エラー: {str(e)}"
+    
+    def get_file_info(self, file_path):
+        """
+        ファイル情報を取得
+        
+        Args:
+            file_path (str): ファイルパス
+            
+        Returns:
+            dict: ファイル情報（存在しない場合はNone）
+        """
+        try:
+            if not file_path or not self.storage.exists(file_path):
+                return None
+            
+            return {
+                'path': file_path,
+                'url': self.storage.url(file_path),
+                'size': self.storage.size(file_path),
+                'exists': True
+            }
+            
+        except Exception as e:
+            logger.error(f"ファイル情報取得エラー: {str(e)}")
+            return None
+
+
+class S3PushNotificationIconStorage(S3Boto3Storage):
+    """S3用のプッシュ通知アイコンストレージ"""
+    location = 'media'
+    default_acl = None  # ACLを使用しない
+    file_overwrite = False
+
+
+class LocalPushNotificationIconStorage(FileSystemStorage):
+    """ローカル用のプッシュ通知アイコンストレージ"""
+    
+    def __init__(self):
+        location = os.path.join(settings.MEDIA_ROOT, 'push_notification_icons')
+        super().__init__(location=location)
 
 
 class EventBridgeSchedulerService:
