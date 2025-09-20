@@ -1,0 +1,16 @@
+{
+    "venvPath": "./path/to",
+    "venv": "venv",
+    "executionEnvironments": [
+        {
+            "root": ".",
+            "pythonVersion": "3.12",
+            "pythonPlatform": "Darwin",
+            "extraPaths": [
+                "./path/to/venv/lib/python3.12/site-packages"
+            ]
+        }
+    ],
+    "typeCheckingMode": "basic",
+    "useLibraryCodeForTypes": true
+}

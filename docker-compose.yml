@@ -1,0 +1,48 @@
+services:
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      # 開発時にコードの変更を反映するためのマウント
+      - .:/app
+      # メディアファイルの永続化
+      - media_data:/app/media
+      # 静的ファイルの永続化
+      - static_data:/app/staticfiles
+    environment:
+      - PYTHONUNBUFFERED=1
+      - DJANGO_SETTINGS_MODULE=handball_video_analysis.settings
+    env_file:
+      - .env
+    depends_on:
+      - db
+    restart: unless-stopped
+
+  # PostgreSQLデータベース（本番環境用のオプション）
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: handball_video_analysis
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+
+  # Redis（キャッシュ用のオプション）
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+
+volumes:
+  media_data:
+  static_data:
+  postgres_data:
+  redis_data:
