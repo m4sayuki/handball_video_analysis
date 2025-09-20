@@ -1,0 +1,97 @@
+楽天API
+https://www.rakuten-wallet.co.jp/service/api-leverage-exchange/
+
+LINE API
+https://developers.line.biz/ja/docs/messaging-api/sending-messages/#reply-messages
+
+LINE API
+
+curl -v -X POST https://api.line.me/v2/bot/message/reply \
+-H 'Content-Type: application/json' \
+-H 'Authorization: Bearer {channel access token}' \
+-d '{
+    "replyToken":"nHuyWiB7yP5Zw52FIkcQobQuGDXCTA",
+    "messages":[
+        {
+            "type":"text",
+            "text":"Hello, user"
+        },
+        {
+            "type":"text",
+            "text":"May I help you?"
+        }
+    ]
+}'
+
+LINE kid
+386ac71b-5e08-49bc-aebe-1ad7b0cf450f
+
+JWT生成
+import jwt
+from jwt.algorithms import RSAAlgorithm
+import time
+
+privateKey = {
+  "alg": "RS256",
+  "d": "QdE9-WXsiVy6Fw70r8i5PpVLAgPguD0se900tMg1z9Fh94G5RP9_8ATm5GxsTwaepbpKdE0MSOYPR7RP08IG09jsUtl_nTFohsDbt-ddoIwkjakorAlma5Xq1pNc5SVgpOyc1I1cyJ4CxG1vRakSSDwplokPPtYF6OeGFlg_RH9YD1ZquEVbU1bVYsar07JD9xz4UahnjTVXqBFlXlMi3NtBseaJ-pgFNugjS2i4pf4XzxpXmS6_5y0dPJsTP-BZFBUtrOtavYrT-vCgZgXcA7iSsMzIXbbprRaLEFnMQRBJPbVCu_TmLx_cDej8wZiGZi4ZXqOO99k3R69GE17MQQ",
+  "dp": "TbY6m7T3AumMP2Zo_Fz4pmh2kylYDU9PwBIXfmCqavpP3mu3u3QDJJKMqUhA0EUhg5vIZSph9l6qjrKaTTo5Yd_Q1nFPr6Fj_C7IbqyemkhxPu8soQFAHnFtNFL6iraLytQwfCUO1BMOqGm8lbLv8y0dJtm3SJOdxeSBWB1A9lM",
+  "dq": "ej-JnpHT7jtlyoXt3teWIBJwEEZzNU7ofkRE3EM7IGaIB4jDpCXGYUNAYAqdt05419SqczVBFeGRclBbBk4ur4GELLH1ekGxmde1Okzw1ApgqaU3ER3gULpUXIy5HBdHaHuvQORITGZPpK2mUBowA105CRsI2evgUqKgXEAsDgk",
+  "e": "AQAB",
+  "kty": "RSA",
+  "n": "onpspKlPQgIdvJY77Z1ruVKY5C3Zd9JgcGoAGKf3SHfl22R8kvcjNhXl8De0Ww6sYUlnUeH_NXG_31NtCu8DzE_EjxRtm6V9KqKQkukaa7WHXYOhAnMy2NCAy6QUI6mARd2Iq6o6w4IOwgRuzr9QlrkVlmqXMyiB5iHbLp33Z93EYABFBHZcBhd61AFbyH6mfxC8fuUtjnALW04JOhk5ClhRfECvZAL44_tgsn29z0XMdd12EJ354scUUdM1Koqecc7yCrHLnsF39xviNtEkFg8Dbftc23mQvTABdoY7hR2kZ0Wp7RS98Y_wX5jfWbxrsAiEiK3z3KRSyosbsL-_Rw",
+  "p": "w3icC7839Ess68uxis11W6HsAvJiVrZjkHDyuwSEhWV5k5UzIgXSjbfVv89diGex4DzMpvDPrSieC22wvzT0dMbGMywHW88a7VljLoiQxp7LAXLOHkzddff_qdpbkcUhoEf0Spv_Q6-To__GJIapvoO43S12mttOQRYC2v5jrx8",
+  "q": "1MpmescdHyuQLamAi7jAAnOaODFb_GWs2koeshLwTEWnowunuWfj0TRtRfpsRXZ6hnWaNrt1V9E3YSBhaT2kbNEyxY-fXrcalr_GPzUTfJP1ESBnSI_GHW6EKC11LXurOZA7RDpKpbBvXY9pGEwZMfL9J0C1YmJD1UsXYAer8tk",
+  "qi": "MqL6J6OgHDXrn5KXRaqFeqZim5OmdKXwls20Fj2lF0-PVucxKDR8hA40qgNBvrrIQ971nNsOV1vZlx-IgxwWx-PGRe2-1qLuxrAfvBuTwFw921b00Ew_4dl2JCYwqbW3G-PoW6461qdAxCTcf6BU9LCnYQhbCfCYxNtd_id0gC0",
+  "use": "sig"
+}
+
+headers = {
+    "alg": "RS256",
+    "typ": "JWT",
+    "kid": "386ac71b-5e08-49bc-aebe-1ad7b0cf450f"
+}
+
+payload = {
+  "iss": "2007891775",
+  "sub": "2007891775",
+  "aud": "https://api.line.me/",
+  "exp":int(time.time())+(60 * 30),
+  "token_exp": 60 * 60 * 24 * 30
+}
+
+key = RSAAlgorithm.from_jwk(privateKey)
+
+JWT = jwt.encode(payload, key, algorithm="RS256", headers=headers, json_encoder=None)
+print(JWT)
+
+生成したJWT
+eyJhbGciOiJSUzI1NiIsImtpZCI6IjM4NmFjNzFiLTVlMDgtNDliYy1hZWJlLTFhZDdiMGNmNDUwZiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiIyMDA3ODkxNzc1Iiwic3ViIjoiMjAwNzg5MTc3NSIsImF1ZCI6Imh0dHBzOi8vYXBpLmxpbmUubWUvIiwiZXhwIjoxNzU0NTc2NjI4LCJ0b2tlbl9leHAiOjI1OTIwMDB9.oXCPI_IHfZa1sOTmEy5Hu4KJu0nnBg5FvV3tRO_i2rdZJvfee9ARQbiKAUVD9cXTpf-MdgZfojsYtWXRM3Nese-U0jmhd3brNtyO1OColNJLmQFyOciAk65eoEI07MM22pECX_NhbPxSaISiQ6fwTxgLbOuqqeepU1cTAIncZsWw5aalJyKmYx4fOAJg_rwITFbO8wyc9eoppWL7mWLiN3z_CN_5Dk6k0Ks5IBDVEw-BdkhaYXpVrv_0JaYsq1WhbHIE1reQ27zZr7JxXnGfaHOpwu1VioMnWOH5zv7uQl1Kf9du5zhI8VJUuwiMQJzk13GvRIOwoFXryfhHn3FBQQ
+
+curl -X GET https://api.line.me/oauth2/v2.1/tokens/kid \
+--data-urlencode 'client_assertion_type=urn:ietf:params:oauth:client-assertion-type:jwt-bearer' \
+--data-urlencode 'client_assertion=eyJhbGciOiJSUzI1NiIsImtpZCI6IjM4NmFjNzFiLTVlMDgtNDliYy1hZWJlLTFhZDdiMGNmNDUwZiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiIyMDA3ODkxNzc1Iiwic3ViIjoiMjAwNzg5MTc3NSIsImF1ZCI6Imh0dHBzOi8vYXBpLmxpbmUubWUvIiwiZXhwIjoxNzU0NTc2NjI4LCJ0b2tlbl9leHAiOjI1OTIwMDB9.oXCPI_IHfZa1sOTmEy5Hu4KJu0nnBg5FvV3tRO_i2rdZJvfee9ARQbiKAUVD9cXTpf-MdgZfojsYtWXRM3Nese-U0jmhd3brNtyO1OColNJLmQFyOciAk65eoEI07MM22pECX_NhbPxSaISiQ6fwTxgLbOuqqeepU1cTAIncZsWw5aalJyKmYx4fOAJg_rwITFbO8wyc9eoppWL7mWLiN3z_CN_5Dk6k0Ks5IBDVEw-BdkhaYXpVrv_0JaYsq1WhbHIE1reQ27zZr7JxXnGfaHOpwu1VioMnWOH5zv7uQl1Kf9du5zhI8VJUuwiMQJzk13GvRIOwoFXryfhHn3FBQQ' \
+-G
+
+チャネルアクセストークンv2.1を発行する
+curl -v -X POST https://api.line.me/oauth2/v2.1/token \
+-H 'Content-Type: application/x-www-form-urlencoded' \
+-d 'grant_type=client_credentials' \
+-d 'client_assertion_type=urn%3Aietf%3Aparams%3Aoauth%3Aclient-assertion-type%3Ajwt-bearer' \
+-d 'client_assertion=eyJhbGciOiJSUzI1NiIsImtpZCI6IjM4NmFjNzFiLTVlMDgtNDliYy1hZWJlLTFhZDdiMGNmNDUwZiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiIyMDA3ODkxNzc1Iiwic3ViIjoiMjAwNzg5MTc3NSIsImF1ZCI6Imh0dHBzOi8vYXBpLmxpbmUubWUvIiwiZXhwIjoxNzU0NTc2NjI4LCJ0b2tlbl9leHAiOjI1OTIwMDB9.oXCPI_IHfZa1sOTmEy5Hu4KJu0nnBg5FvV3tRO_i2rdZJvfee9ARQbiKAUVD9cXTpf-MdgZfojsYtWXRM3Nese-U0jmhd3brNtyO1OColNJLmQFyOciAk65eoEI07MM22pECX_NhbPxSaISiQ6fwTxgLbOuqqeepU1cTAIncZsWw5aalJyKmYx4fOAJg_rwITFbO8wyc9eoppWL7mWLiN3z_CN_5Dk6k0Ks5IBDVEw-BdkhaYXpVrv_0JaYsq1WhbHIE1reQ27zZr7JxXnGfaHOpwu1VioMnWOH5zv7uQl1Kf9du5zhI8VJUuwiMQJzk13GvRIOwoFXryfhHn3FBQQ'
+-G
+
+{
+	"access_token": "eyJhbGciOiJIUzI1NiJ9.sNbKQfGOsGmyRY_k7JGDcyuGJN3egoxfiLBlU4zLVdj-r9B6KAEZdtEj4XDpxwtJ33AACMEd3zZzbuBRpqVXA8_7JogOWclsV9O5iGg-g6GRo_fCYUix1yNmH5m9Ii4V.-lK7jniEqYvZtFyiE1hABKyuA7otnLZXQ8T5XDsgojc",
+	"token_type": "Bearer",
+	"expires_in": 2592000,
+	"key_id": "l4gY8jbSxtdrzD6L6BjVDQ"
+}
+
+チャネルアクセストークンv2.1の有効性を検証する
+curl -v -X GET https://api.line.me/oauth2/v2.1/verify \
+-H 'Content-Type: application/x-www-form-urlencoded' \
+--data-urlencode 'access_token=eyJhbGciOiJIUzI1NiJ9.sNbKQfGOsGmyRY_k7JGDcyuGJN3egoxfiLBlU4zLVdj-r9B6KAEZdtEj4XDpxwtJ33AACMEd3zZzbuBRpqVXA8_7JogOWclsV9O5iGg-g6GRo_fCYUix1yNmH5m9Ii4V.-lK7jniEqYvZtFyiE1hABKyuA7otnLZXQ8T5XDsgojc' \
+-G
+
+要件
+・朝9時と夜19時にLINEで現在の株式の終値をLINE通知する
